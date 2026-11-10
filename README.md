@@ -9,7 +9,7 @@ Servidor MCP de **numerologia pitagórica** para usar com o Claude. Calcula o ma
 | `calcular_mapa` | Caminho de Vida, Expressão, Desejo da Alma, Personalidade, Aniversário, Maturidade, 3 ciclos de vida, 4 pináculos e 4 desafios (com idades e anos) |
 | `ciclo_pessoal` | Ano, Mês e Dia Pessoal de uma data (padrão: hoje, fuso de Fortaleza) |
 | `linha_do_tempo` | Ano e Mês Pessoal mês a mês num período de até 120 meses |
-| `significado_numero` | Palavras-chave (luz e sombra) de 0–9, 11, 22 e 33 |
+| `significado_numero` | Arquétipo, essência, luz e sombra e interpretação por parte do mapa (1–9, 11, 22, 33; o 0 como desafio) |
 
 ### Convenções de cálculo
 
@@ -17,8 +17,26 @@ Servidor MCP de **numerologia pitagórica** para usar com o Claude. Calcula o ma
 - **Caminho de Vida:** dia, mês e ano reduzidos separadamente e depois somados.
 - **Ciclos de vida:** juventude = mês, maturidade = dia, sabedoria = ano. A juventude termina aos 36 − Caminho de Vida e a maturidade dura 27 anos.
 - **Números mestres** 11, 22 e 33 são preservados nos números do mapa (opção `preservar_mestres`). Nos ciclos pessoais a redução vai até 1–9.
+- **Nome:** cada parte do nome é reduzida separadamente e depois somada (`reducao_nome: "por_parte"`, padrão). Use `"total"` para somar todas as letras de uma vez; a diferença só aparece quando surge um número mestre.
 - **Y** conta como consoante, a menos que `y_como_vogal` seja `true`.
 - **Ano Pessoal** muda em 1º de janeiro por padrão; use `inicio_do_ano: "aniversario"` para virar no dia do aniversário.
+
+## Interpretações
+
+`calcular_mapa` devolve, junto com os números, um texto para cada um (desligue com `com_interpretacao: false`). Os textos são originais, curtos e servem como ponto de partida para a leitura.
+
+## Equivalência com o Teledipity
+
+| Teledipity | Este MCP |
+|---|---|
+| Life Path | `caminhoDeVida` |
+| Talents | `expressao` |
+| Desires | `desejoDaAlma` |
+| Personality | `personalidade` |
+| Life Cycles | `ciclosDeVida` (juventude e maturidade) |
+| Yearly / Monthly Forecast | Ano e Mês Pessoal, virando em 1º de janeiro |
+
+Para os números baterem, use o mesmo nome cadastrado no Teledipity.
 
 ## Rodando localmente
 
