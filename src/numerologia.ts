@@ -17,7 +17,16 @@ export interface Opcoes {
   preservarMestres?: boolean;
   /** Trata Y como vogal (padrão: false) */
   yComoVogal?: boolean;
+  /**
+   * Como reduzir os números do nome:
+   * - "por_parte" (padrão): reduz cada nome separadamente e depois a soma
+   *   (método clássico; é o que o Teledipity usa)
+   * - "total": soma todas as letras e reduz uma vez
+   */
+  reducaoNome?: ReducaoNome;
 }
+
+export type ReducaoNome = "por_parte" | "total";
 
 export interface DataNascimento {
   dia: number;
@@ -77,12 +86,27 @@ export function parseData(data: string): DataNascimento {
   return { dia, mes, ano };
 }
 
-function somaLetras(nome: string, filtro: (letra: string) => boolean): number {
-  return normalizarNome(nome)
-    .replace(/ /g, "")
+function somaParte(parte: string, filtro: (letra: string) => boolean): number {
+  return parte
     .split("")
     .filter(filtro)
     .reduce((acc, l) => acc + VALOR_LETRA[l], 0);
+}
+
+/** Soma e reduz as letras do nome segundo o método escolhido. */
+function numeroDoNome(nome: string, filtro: (letra: string) => boolean, op: Opcoes): number {
+  const pm = op.preservarMestres ?? true;
+  const partes = normalizarNome(nome)
+    .split(" ")
+    .filter(Boolean)
+    .map((p) => somaParte(p, filtro));
+  if ((op.reducaoNome ?? "por_parte") === "total") {
+    return reduzir(partes.reduce((a, b) => a + b, 0), pm);
+  }
+  return reduzir(
+    partes.map((s) => reduzir(s, pm)).reduce((a, b) => a + b, 0),
+    pm,
+  );
 }
 
 /**
@@ -96,7 +120,7 @@ export function caminhoDeVida(nasc: DataNascimento, op: Opcoes = {}): number {
 
 /** Expressão (Destino): todas as letras do nome completo de registro. */
 export function expressao(nome: string, op: Opcoes = {}): number {
-  return reduzir(somaLetras(nome, () => true), op.preservarMestres ?? true);
+  return numeroDoNome(nome, () => true, op);
 }
 
 function ehVogal(l: string, op: Opcoes) {
@@ -105,12 +129,12 @@ function ehVogal(l: string, op: Opcoes) {
 
 /** Desejo da Alma (Motivação): apenas vogais. */
 export function desejoDaAlma(nome: string, op: Opcoes = {}): number {
-  return reduzir(somaLetras(nome, (l) => ehVogal(l, op)), op.preservarMestres ?? true);
+  return numeroDoNome(nome, (l) => ehVogal(l, op), op);
 }
 
 /** Personalidade (Impressão): apenas consoantes. */
 export function personalidade(nome: string, op: Opcoes = {}): number {
-  return reduzir(somaLetras(nome, (l) => !ehVogal(l, op)), op.preservarMestres ?? true);
+  return numeroDoNome(nome, (l) => !ehVogal(l, op), op);
 }
 
 /** Número do Aniversário: o dia de nascimento reduzido. */

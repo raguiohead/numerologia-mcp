@@ -40,6 +40,12 @@ describe("nome", () => {
   it("remove acentos e cedilha", () => {
     expect(normalizarNome("  João  da Conceição ")).toBe("JOAO DA CONCEICAO");
   });
+  it("reduz o nome por partes (padrão) ou pelo total", () => {
+    // ANA = 7, COSTA = 13 → 4. Por partes: 7 + 4 = 11. Total: 20 → 2.
+    expect(expressao("Ana Costa")).toBe(11);
+    expect(expressao("Ana Costa", { reducaoNome: "total" })).toBe(2);
+  });
+
   it("calcula Expressão, Alma e Personalidade", () => {
     // J=1 O=6 S=1 E=5
     expect(expressao("José")).toBe(4); // 13 → 4
