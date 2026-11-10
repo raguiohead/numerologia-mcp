@@ -6,7 +6,7 @@ Servidor MCP de **numerologia pitagórica** para usar com o Claude. Calcula o ma
 
 | Ferramenta | O que faz |
 |---|---|
-| `calcular_mapa` | Caminho de Vida, Expressão, Desejo da Alma, Personalidade, Aniversário, Maturidade, 4 pináculos e 4 desafios (com idades e anos) |
+| `calcular_mapa` | Caminho de Vida, Expressão, Desejo da Alma, Personalidade, Aniversário, Maturidade, 3 ciclos de vida, 4 pináculos e 4 desafios (com idades e anos) |
 | `ciclo_pessoal` | Ano, Mês e Dia Pessoal de uma data (padrão: hoje, fuso de Fortaleza) |
 | `linha_do_tempo` | Ano e Mês Pessoal mês a mês num período de até 120 meses |
 | `significado_numero` | Palavras-chave (luz e sombra) de 0–9, 11, 22 e 33 |
@@ -15,6 +15,7 @@ Servidor MCP de **numerologia pitagórica** para usar com o Claude. Calcula o ma
 
 - Tabela pitagórica (A=1 … I=9, J=1 … R=9, S=1 … Z=8). Acentos e cedilha são removidos.
 - **Caminho de Vida:** dia, mês e ano reduzidos separadamente e depois somados.
+- **Ciclos de vida:** juventude = mês, maturidade = dia, sabedoria = ano. A juventude termina aos 36 − Caminho de Vida e a maturidade dura 27 anos.
 - **Números mestres** 11, 22 e 33 são preservados nos números do mapa (opção `preservar_mestres`). Nos ciclos pessoais a redução vai até 1–9.
 - **Y** conta como consoante, a menos que `y_como_vogal` seja `true`.
 - **Ano Pessoal** muda em 1º de janeiro por padrão; use `inicio_do_ano: "aniversario"` para virar no dia do aniversário.

@@ -59,7 +59,7 @@ export function criarServidor(): McpServer {
     {
       title: "Calcular mapa numerológico",
       description:
-        "Calcula o mapa numerológico pitagórico completo: Caminho de Vida, Expressão, Desejo da Alma, Personalidade, Aniversário, Maturidade, pináculos e desafios. Use o nome completo de registro (certidão de nascimento).",
+        "Calcula o mapa numerológico pitagórico completo: Caminho de Vida, Expressão, Desejo da Alma, Personalidade, Aniversário, Maturidade, ciclos de vida (juventude, maturidade e sabedoria), pináculos e desafios. Use o nome completo de registro (certidão de nascimento).",
       inputSchema: {
         nome_completo: z.string().min(2).describe("Nome completo de registro"),
         data_nascimento: dataSchema,
