@@ -1,0 +1,27 @@
+{
+  "name": "numerologia-mcp",
+  "version": "0.1.0",
+  "description": "Servidor MCP de numerologia pitagórica (Ano Pessoal, Caminho de Vida e mais) para usar com o Claude",
+  "scripts": {
+    "dev": "tsx scripts/dev.ts",
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit"
+  },
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.32.2",
+    "zod": "^4.6.7"
+  },
+  "devDependencies": {
+    "@types/node": "^26.6.6",
+    "tsx": "^4.23.15",
+    "typescript": "^7.0.2",
+    "vitest": "^5.1.0"
+  },
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=20"
+  }
+}
