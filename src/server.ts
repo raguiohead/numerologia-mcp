@@ -10,6 +10,7 @@ import {
   type InicioDoAno,
 } from "./numerologia.js";
 import { CICLO_PESSOAL, SIGNIFICADOS } from "./significados.js";
+import { DESAFIOS, INTERPRETACOES, NOMES_SECOES, interpretar, type Secao } from "./interpretacoes.js";
 
 const dataSchema = z
   .string()
@@ -45,14 +46,14 @@ function cicloEm(nasc: DataNascimento, ref: DataNascimento, inicio: InicioDoAno)
   const dia = diaPessoal(nasc, ref, inicio);
   return {
     data: `${ref.ano}-${String(ref.mes).padStart(2, "0")}-${String(ref.dia).padStart(2, "0")}`,
-    anoPessoal: { numero: ano, tema: CICLO_PESSOAL[ano] },
-    mesPessoal: { numero: mes, tema: CICLO_PESSOAL[mes] },
+    anoPessoal: { numero: ano, tema: CICLO_PESSOAL[ano], interpretacao: INTERPRETACOES[ano].anoPessoal },
+    mesPessoal: { numero: mes, tema: CICLO_PESSOAL[mes], interpretacao: INTERPRETACOES[mes].mesPessoal },
     diaPessoal: { numero: dia, tema: CICLO_PESSOAL[dia] },
   };
 }
 
 export function criarServidor(): McpServer {
-  const server = new McpServer({ name: "numerologia-mcp", version: "0.1.0" });
+  const server = new McpServer({ name: "numerologia-mcp", version: "0.2.0" });
 
   server.registerTool(
     "calcular_mapa",
@@ -68,16 +69,55 @@ export function criarServidor(): McpServer {
           .default(true)
           .describe("Mantém 11, 22 e 33 sem reduzir"),
         y_como_vogal: z.boolean().default(false).describe("Conta a letra Y como vogal"),
+        reducao_nome: z
+          .enum(["por_parte", "total"])
+          .default("por_parte")
+          .describe(
+            "'por_parte' (padrão, igual ao Teledipity): reduz cada nome e depois a soma. 'total': soma todas as letras e reduz uma vez. Só muda o resultado quando aparece número mestre.",
+          ),
+        com_interpretacao: z
+          .boolean()
+          .default(true)
+          .describe("Inclui textos de interpretação para cada número"),
       },
       annotations: { readOnlyHint: true, openWorldHint: false },
     },
-    async ({ nome_completo, data_nascimento, preservar_mestres, y_como_vogal }) => {
+    async ({
+      nome_completo,
+      data_nascimento,
+      preservar_mestres,
+      y_como_vogal,
+      reducao_nome,
+      com_interpretacao,
+    }) => {
       const nasc = parseData(data_nascimento);
       const mapa = mapaCompleto(nome_completo, nasc, {
         preservarMestres: preservar_mestres,
         yComoVogal: y_como_vogal,
+        reducaoNome: reducao_nome,
       });
-      return json(mapa);
+      if (!com_interpretacao) return json(mapa);
+      return json({
+        ...mapa,
+        interpretacao: {
+          caminhoDeVida: interpretar(mapa.caminhoDeVida, "caminhoDeVida"),
+          expressao: interpretar(mapa.expressao, "expressao"),
+          desejoDaAlma: interpretar(mapa.desejoDaAlma, "desejoDaAlma"),
+          personalidade: interpretar(mapa.personalidade, "personalidade"),
+          ciclosDeVida: mapa.ciclosDeVida.map((c) => ({
+            ciclo: c.ciclo,
+            ...interpretar(c.numero, "cicloDeVida"),
+          })),
+          desafios: mapa.desafios.map((d) => ({ numero: d.numero, texto: DESAFIOS[d.numero] })),
+        },
+        equivalenciaTeledipity: {
+          "Life Path": "caminhoDeVida",
+          Talents: "expressao",
+          Desires: "desejoDaAlma",
+          Personality: "personalidade",
+          "Life Cycles": "ciclosDeVida (juventude e maturidade)",
+        },
+      });
     },
   );
 
@@ -147,16 +187,33 @@ export function criarServidor(): McpServer {
     {
       title: "Significado de um número",
       description:
-        "Palavras-chave de referência (luz e sombra) de um número de 0 a 9 ou dos mestres 11, 22 e 33, e o tema dele como ciclo pessoal.",
+        "Interpretação de um número (1 a 9, 11, 22 ou 33): arquétipo, essência, luz e sombra e o texto para cada parte do mapa (Caminho de Vida, Expressão, Desejo da Alma, Personalidade, Ciclo de Vida, Ano e Mês Pessoal). Use 'secao' para pedir só uma parte. O 0 só existe como desafio.",
       inputSchema: {
         numero: z.number().int().describe("0 a 9, 11, 22 ou 33"),
+        secao: z
+          .enum(Object.keys(NOMES_SECOES) as [Secao, ...Secao[]])
+          .optional()
+          .describe("Parte do mapa para a qual interpretar o número"),
       },
       annotations: { readOnlyHint: true, openWorldHint: false },
     },
-    async ({ numero }) => {
+    async ({ numero, secao }) => {
       const sig = SIGNIFICADOS[numero];
       if (!sig) throw new Error("Use um número de 0 a 9, 11, 22 ou 33.");
-      return json({ numero, ...sig, comoCiclo: CICLO_PESSOAL[numero] ?? null });
+      const interp = INTERPRETACOES[numero];
+      const base = {
+        numero,
+        tema: sig.tema,
+        luz: sig.luz,
+        sombra: sig.sombra,
+        comoDesafio: numero <= 8 ? DESAFIOS[numero] : null,
+      };
+      if (!interp) return json(base);
+      if (secao) {
+        return json({ ...base, arquetipo: interp.arquetipo, secao: NOMES_SECOES[secao], texto: interp[secao] });
+      }
+      const { arquetipo, essencia, ...secoes } = interp;
+      return json({ ...base, arquetipo, essencia, secoes });
     },
   );
 
