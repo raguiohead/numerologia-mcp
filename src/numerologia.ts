@@ -206,6 +206,30 @@ export function pinaculosEDesafios(nasc: DataNascimento, op: Opcoes = {}) {
   return { pinaculos: montar([p1, p2, p3, p4]), desafios: montar([c1, c2, c3, c4]) };
 }
 
+/**
+ * Ciclos de vida (períodos): juventude = mês, maturidade = dia, sabedoria = ano.
+ * A juventude termina em 36 - Caminho de Vida (mesma idade do 1º pináculo)
+ * e a maturidade dura 27 anos.
+ */
+export function ciclosDeVida(nasc: DataNascimento, op: Opcoes = {}) {
+  const pm = op.preservarMestres ?? true;
+  const fimJuventude = 36 - raiz(caminhoDeVida(nasc, op));
+  const fimMaturidade = fimJuventude + 27;
+  const montar = (nome: string, numero: number, ini: number, fim: number | null) => ({
+    ciclo: nome,
+    numero,
+    idadeInicio: ini,
+    idadeFim: fim,
+    anoInicio: nasc.ano + ini,
+    anoFim: fim === null ? null : nasc.ano + fim,
+  });
+  return [
+    montar("juventude", reduzir(nasc.mes, pm), 0, fimJuventude),
+    montar("maturidade", reduzir(nasc.dia, pm), fimJuventude + 1, fimMaturidade),
+    montar("sabedoria", reduzir(nasc.ano, pm), fimMaturidade + 1, null),
+  ];
+}
+
 export function mapaCompleto(nome: string, nasc: DataNascimento, op: Opcoes = {}) {
   return {
     nomeNormalizado: normalizarNome(nome),
@@ -215,6 +239,7 @@ export function mapaCompleto(nome: string, nasc: DataNascimento, op: Opcoes = {}
     personalidade: personalidade(nome, op),
     aniversario: aniversario(nasc, op),
     maturidade: maturidade(nasc, nome, op),
+    ciclosDeVida: ciclosDeVida(nasc, op),
     ...pinaculosEDesafios(nasc, op),
   };
 }

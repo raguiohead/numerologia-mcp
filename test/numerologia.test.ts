@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import {
   anoPessoal,
   caminhoDeVida,
+  ciclosDeVida,
   desejoDaAlma,
   diaPessoal,
   expressao,
@@ -64,6 +65,16 @@ describe("Caminho de Vida e ciclos", () => {
   it("Ano Pessoal com início no aniversário", () => {
     expect(anoPessoal(nasc, parseData("2026-08-03"), "aniversario")).toBe(3); // ainda 2025
     expect(anoPessoal(nasc, parseData("2026-08-04"), "aniversario")).toBe(4);
+  });
+
+  it("ciclos de vida (juventude, maturidade, sabedoria)", () => {
+    const ciclos = ciclosDeVida(nasc);
+    expect(ciclos.map((c) => c.numero)).toEqual([8, 4, 8]);
+    expect(ciclos.map((c) => [c.idadeInicio, c.idadeFim])).toEqual([
+      [0, 34],
+      [35, 61],
+      [62, null],
+    ]);
   });
 
   it("pináculos e desafios", () => {
